@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GhostMail | Buzón Temporal Seguro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Inter:wght@400;600&display=swap');
+
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #111827;
+            --accent-color: #00ff66;
+            --accent-glow: rgba(0, 255, 102, 0.3);
+            --text-white: #f3f4f6;
+            --text-gray: #9ca3af;
+            --border-color: #1f2937;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-white);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-family: 'Rajdhani', sans-serif;
+            color: var(--accent-color);
+            font-size: 2.2em;
+            margin-top: 0;
+            margin-bottom: 5px;
+            text-align: center;
+            text-shadow: 0 0 15px var(--accent-glow);
+            letter-spacing: 1px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 0.9em;
+            margin-bottom: 25px;
+        }
+
+        .email-box {
+            background: #080d16;
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .email-display {
+            font-family: monospace;
+            font-size: 1.15em;
+            color: var(--accent-color);
+            word-break: break-all;
+            margin-right: 10px;
+        }
+
+        .btn {
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #1f2937;
+            color: var(--text-white);
+            border: 1px solid #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #374151;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .inbox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .inbox-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            color: var(--text-white);
+        }
+
+        .inbox-list {
+            background: #080d16;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .msg-item {
+            background: #121a2b;
+            border: 1px solid #1f2937;
+            border-left: 4px solid var(--accent-color);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .msg-item:hover {
+            background: #1a243b;
+        }
+
+        .msg-from {
+            font-weight: 600;
+            font-size: 0.9em;
+            color: var(--text-white);
+        }
+
+        .msg-subject {
+            font-size: 0.85em;
+            color: var(--text-gray);
+            margin-top: 3px;
+        }
+
+        .msg-date {
+            font-size: 0.75em;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .empty-inbox {
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 0.9em;
+            padding: 30px;
+            margin: 0;
+        }
+
+        /* Modal para leer el mensaje */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 25px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 25px var(--accent-glow);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--accent-color);
+        }
+
+        .body-text {
+            background: #080d16;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            white-space: pre-wrap;
+            font-size: 0.9em;
+            line-height: 1.5;
+            color: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>GHOSTMAIL</h1>
+        <p class="subtitle">Buzón de correo temporal ultrarrápido y seguro</p>
+
+        <!-- Caja del Correo Activo -->
+        <div class="email-box">
+            <span class="email-display" id="email-address">Generando correo...</span>
+            <button class="btn" onclick="copiarCorreo()">Copiar</button>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="actions-grid">
+            <button class="btn btn-secondary" onclick="generarNuevoCorreo()">🔄 Nuevo Correo</button>
+            <button class="btn btn-secondary" onclick="actualizarBandeja()">📥 Actualizar Buzón</button>
+        </div>
+
+        <!-- Bandeja de Entrada -->
+        <div class="inbox-header">
+            <h3>Bandeja de Entrada</h3>
+            <span id="status-indicator" style="font-size: 0.8em; color: var(--accent-color);">● Auto-actualizando</span>
+        </div>
+        <div class="inbox-list" id="inbox-container">
+            <p class="empty-inbox">Buzón limpio. Esperando mensajes...</p>
+        </div>
+    </div>
+
+    <!-- Modal de Lectura de Mensaje -->
+    <div class="modal" id="msg-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-subject">Asunto del mensaje</h3>
+                <button class="btn btn-secondary" style="padding: 5px 10px;" onclick="cerrarModal()">✕</button>
+            </div>
+            <p style="font-size: 0.85em; color: var(--text-gray); margin-top: 0;" id="modal-from">De: </p>
+            <div class="body-text" id="modal-body">Cargando contenido...</div>
+        </div>
+    </div>
+
+    <script>
+        let correoActual = "";
+        let inboxInterval = null;
+
+        function generarNuevoCorreo() {
+            fetch('https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1')
+                .then(res => res.json())
+                .then(data => {
+                    if(data && data.length > 0) {
+                        correoActual = data[0];
+                        document.getElementById('email-address').innerText = correoActual;
+                        actualizarBandeja();
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('email-address').innerText = "Error al generar correo";
+                });
+        }
+
+        function copiarCorreo() {
+            if(!correoActual) return;
+            navigator.clipboard.writeText(correoActual);
+            alert("¡Correo copiado al portapapeles!");
+        }
+
+        function actualizarBandeja() {
+            if(!correoActual) return;
+            const parts = correoActual.split('@');
+            if(parts.length !== 2) return;
+
+            fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${parts[0]}&domain=${parts[1]}`)
+                .then(res => res.json())
+                .then(msgs => {
+                    const container = document.getElementById('inbox-container');
+                    container.innerHTML = '';
+
+                    if(!msgs || msgs.length === 0) {
+                        container.innerHTML = '<p class="empty-inbox">Buzón limpio. Esperando mensajes...</p>';
+                        return;
+                    }
+
+                    msgs.forEach(m => {
+                        const div = document.createElement('div');
+                        div.className = 'msg-item';
+                        div.onclick = () => leerMensaje(parts[0], parts[1], m.id, m.subject);
+                        div.innerHTML = `
+                            <div class="msg-from">De: ${m.from}</div>
+                            <div class="msg-subject">${m.subject || '(Sin Asunto)'}</div>
+                            <div class="msg-date">${m.date}</div>
+                        `;
+                        container.appendChild(div);
+                    });
+                })
+                .catch(() => {});
+        }
+
+        function leerMensaje(login, domain, id, subject) {
+            document.getElementById('modal-subject').innerText = subject || 'Sin Asunto';
+            document.getElementById('modal-from').innerText = 'Cargando remitente...';
+            document.getElementById('modal-body').innerText = 'Cargando contenido del mensaje...';
+            document.getElementById('msg-modal').style.display = 'flex';
+
+            fetch(`https://www.1secmail.com/api/v1/?action=readMessage&login=${login}&domain=${domain}&id=${id}`)
+                .then(res => res.json())
+                .then(msg => {
+                    document.getElementById('modal-from').innerText = `De: ${msg.from}`;
+                    document.getElementById('modal-body').innerText = msg.textBody || msg.body || 'Sin contenido de texto.';
+                })
+                .catch(() => {
+                    document.getElementById('modal-body').innerText = 'Error al cargar el contenido del mensaje.';
+                });
+        }
+
+        function cerrarModal() {
+            document.getElementById('msg-modal').style.display = 'none';
+        }
+
+        // Inicializar al cargar la página
+        window.onload = function() {
+            generarNuevoCorreo();
+            // Auto-actualizar cada 10 segundos
+            inboxInterval = setInterval(actualizarBandeja, 10000);
+        };
+    </script>
+</body>
+</html>
